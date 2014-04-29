@@ -2,12 +2,17 @@ body {
   background-color: #ccc;
 }
 
-#container {
+#container,
+#readme {
   background-color: #fff;
-  height: 740px;
-  margin: 0 auto;
+  line-height: 24px;
+  margin: 40px auto;
   padding: 20px;
   width: 740px;
+}
+
+#container {
+  height: 510px;
 }
 
 #board {
@@ -18,6 +23,6 @@ body {
 
 #board td {
   border: 1px solid #000;
-  height: 140px;
-  width: 140px;
+  height: 40px;
+  width: 40px;
 }

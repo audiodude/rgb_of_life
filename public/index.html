@@ -8,13 +8,21 @@
 </head>
 <body>
   <div id="container">
-    <table id="board">
-      <tr><td id="0-0"><td id="1-0"><td id="2-0"><td id="3-0"><td id="4-0"></tr>
-      <tr><td id="0-1"><td id="1-1"><td id="2-1"><td id="3-1"><td id="4-1"></tr>
-      <tr><td id="0-2"><td id="1-2"><td id="2-2"><td id="3-2"><td id="4-2"></tr>
-      <tr><td id="0-3"><td id="1-3"><td id="2-3"><td id="3-3"><td id="4-3"></tr>
-      <tr><td id="0-4"><td id="1-4"><td id="2-4"><td id="3-4"><td id="4-4"></tr>
-    </table>
+    <!-- Table goes here -->
+    <button id="playpause" onclick="playpause()">Play</button>
+    <button onclick="clear_board();">Clear</button><br>
+    <button onclick="preset(0);">Preset 0</button>
+    <button onclick="preset(1);">Preset 1</button>
+    <button onclick="preset(2);">Preset 2</button>
+  </div>
+  <div id="readme">
+    <h1>RGB Of Life</h1>
+    <p>
+      This page demonstrates <a href="http://en.wikipedia.org/wiki/Conway's_Game_of_Life">Conway's Game of Life</a> in what can be considered 24 dimensions. There are actually 24 simulataneous "games of life" being played on the above board, one for each bit in a <a href="http://en.wikipedia.org/wiki/RGB_color_model">24 bit RGB color value</a> that is the background of the square. However, since we naturally think of white as the "dead" color and black as the "alive" color, the bits have been flipped in this demonstration so that 0 represents alive and 1 represents dead. Thus #fff which is white, represents a cell that is completely dead, even though all of the bits are "on".
+    </p>
+    <p>
+      Feel free to browse the <a href="/js/main.js">Javascript source</a> of this demonstration. It makes heavy use of the <a href="http://jquery.com/">jQuery</a> Javascript library. The source code of this demonstration is <a href="https://github.com/audiodude/rgb_of_life">available on Github</a>.
+    </p>
   </div>
 </body>
 </html>
