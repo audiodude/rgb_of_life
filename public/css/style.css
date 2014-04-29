@@ -1,0 +1,23 @@
+body {
+  background-color: #ccc;
+}
+
+#container {
+  background-color: #fff;
+  height: 740px;
+  margin: 0 auto;
+  padding: 20px;
+  width: 740px;
+}
+
+#board {
+  border: 1px solid #000;
+  border-collapse: collapse;
+  margin: 10px auto;
+}
+
+#board td {
+  border: 1px solid #000;
+  height: 140px;
+  width: 140px;
+}
