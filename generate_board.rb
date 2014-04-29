@@ -2,7 +2,7 @@ puts '<table id="board">'
 5.times do |i|
   print "<tr>"
   5.times do |j|
-    print "<td id=\"#{j.to_s.rjust(2, "0")}-#{i.to_s.rjust(2, "0")}\">"
+    print "<td id=\"#{j}-#{i}\">"
   end
   puts "</tr>"
 end
