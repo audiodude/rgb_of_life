@@ -63,7 +63,7 @@ function update_colors() {
     for (var col = 0; col < COLS; col++) {
       color = ~STATE_CUR[cell_index(col, row)] & 0xffffff;
       ctx.fillStyle = '#' + ('000000' + color.toString(16)).substr(-6);
-      ctx.fillRect(col * boxsize, row * boxsize, boxsize, boxsize);
+      ctx.fillRect(col * boxsize + .5, row * boxsize + .5, boxsize, boxsize);
     }
   }
 }
@@ -143,4 +143,6 @@ function playpause() {
 
 $(function() {
   generate_board();
+  preset(3);
+  playpause();
 });
