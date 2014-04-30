@@ -1,5 +1,6 @@
 var COLS = 100;
 var ROWS = 100;
+// Add an extra row/column to the edges to simplify logic later.
 var CELLS = new Array((COLS + 2) * (ROWS + 2));
 var STATE_CUR = new Array(CELLS.length);
 var STATE_NEXT = new Array(CELLS.length);
@@ -71,7 +72,7 @@ function iterate() {
   for (var row=0; row < ROWS; row++) {
     for (var col=0; col < COLS; col++) {
       var cell_id = cell_index(col, row);
-      // Basically implement a 53-way parallel 3-bit incrementer.
+      // Implement an adder so we can evaluate all games simultaneously.
       var s0 = 0;
       var s1 = 0;
       var s2 = 0;
@@ -84,6 +85,10 @@ function iterate() {
           s0 ^= n;
         }
       }
+      // Derived from the table (for all other bitstrings, c' = 0).
+      // c   s2 s1 s0  c'
+      // 0   0  1   1  1
+      // 1   0  1   x  1
       STATE_NEXT[cell_id] = ~s2 & s1 & (STATE_CUR[cell_id] | s0) & 0xffffff;
     }
   }
