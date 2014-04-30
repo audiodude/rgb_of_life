@@ -1,12 +1,16 @@
 var COLS = 10;
 var ROWS = 10;
 var CELLS = new Array(COLS * ROWS);
+var STATE_CUR = new Array(COLS * ROWS);
+var STATE_NEXT = new Array(COLS * ROWS);
 
 // Adapted from http://stackoverflow.com/questions/5999209/jquery-how-to-get-the-background-color-code-of-an-element
 function rgb_parts(colorval) {
   var match = colorval.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
   return [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
 }
+
+function cell_index(col, row) { return row * COLS + col; }
 
 var MASKS = [1, 2, 4, 8, 16, 32, 64, 128];
 function is_bit_on(parts, idx) {
@@ -64,6 +68,7 @@ function generate_board() {
       td.attr('col', j);
       tr.append(td);
       CELLS[i * COLS + j] = td;
+      STATE_CUR[i * COLS + j] = Number(0xffffff);
     }
   }
 }
@@ -83,13 +88,25 @@ function randomize_colors() {
   }
 }
 
+function set_cell_color(state, cell_id, r, g, b) {
+  state[cell_id] = Number((r << 16) + (g << 8) + b);
+}
+
+function update_colors() {
+  for (var i = 0; i < CELLS.length; i++) {
+    var c = i * 3;
+    CELLS[i].css(
+      'background-color', '#' + ('000000' + STATE_CUR[i].toString(16)).substr(-6));
+  }
+}
+
 // Strangely, we use 0 bits as "alive" and 1 bits as "dead", because we want
 // the fully dead state to be #fff, or white.
 function iterate() {
   var new_colors = new Array(CELLS.length);
   for (var y=0; y<ROWS; y++) {
     for (var x=0; x<COLS; x++) {
-      var cell_id = y * COLS + x;
+      var cell_id = cell_index(x, y);
       var cur_cell = CELLS[cell_id];
       var cur_bg_color = cur_cell.css('background-color')
       var bits = [];
@@ -106,33 +123,38 @@ function iterate() {
       r = parseInt(bits.slice(0,8).join(''), 2);
       g = parseInt(bits.slice(8,16).join(''), 2);
       b = parseInt(bits.slice(16,24).join(''), 2);
-      new_colors[cell_id] = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+      set_cell_color(STATE_NEXT, cell_id, r, g, b);
     }
   }
-  for (var i = 0; i < CELLS.length; i++)
-    CELLS[i].css('background-color', new_colors[i]);
+  var t = STATE_CUR;
+  STATE_CUR = STATE_NEXT;
+  STATE_NEXT = t;
+  update_colors();
 }
 
 function preset(idx) {
   idx = idx || 0;
-  function set_color(color) {
-    return function(_, x) { CELLS[x[0] + x[1] * COLS].css('background-color', color) };
+  function set_color(r, g, b) {
+    return function(_, x) {
+      set_cell_color(STATE_CUR, cell_index(x[0], x[1]), r, g, b);
+    };
   }
   switch(idx) {
     case 2:
       $([[1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3],
         [1,6], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6]]).map(
-          set_color('#3663cc'));
+          set_color(54, 99, 204));
     case 1:
     $([[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2],
       [1,7], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7]]).map(
-        set_color('#28bb82'));
+        set_color(40, 187, 130));
 
     case 0:
     $([[1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1],
       [1,8], [2,8], [3,8], [4,8], [5,8], [6,8], [7,8], [8,8]]).map(
-        set_color('#aa2525'));
+        set_color(170, 37, 37));
   }
+  update_colors();
 }
 
 var interval_id;
