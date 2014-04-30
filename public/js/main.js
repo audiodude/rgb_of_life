@@ -1,37 +1,19 @@
 var COLS = 100;
 var ROWS = 100;
 // Add an extra row/column to the edges to simplify logic later.
-var CELLS = new Array((COLS + 2) * (ROWS + 2));
-var STATE_CUR = new Array(CELLS.length);
-var STATE_NEXT = new Array(CELLS.length);
+var num_cells = (COLS + 2) * (ROWS + 2);
+var STATE_CUR = new Array(num_cells);
+var STATE_NEXT = new Array(num_cells);
 var canvas;
-
-// Adapted from http://stackoverflow.com/questions/5999209/jquery-how-to-get-the-background-color-code-of-an-element
-function rgb_parts(colorval) {
-  var match = colorval.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-  return [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
-}
+var interval_id;
 
 function cell_index(col, row) { return row * (COLS + 2) + col + 1; }
 
-var MASKS = [1, 2, 4, 8, 16, 32, 64, 128];
-function is_bit_on(parts, idx) {
-  var mask = MASKS[idx % 8];
-  return ((idx < 8 && !(parts[2] & mask)) ||
-      (idx < 16 && !(parts[1] & mask)) ||
-      (idx < 24 && !(parts[0] & mask)));
-}
-
-function generate_board() {
-  canvas = document.getElementById('display');
-  clear_board();
-}
-
 function clear_board() {
-  for (var i = 0; i < CELLS.length; i++) {
+  for (var i = 0; i < num_cells; i++) {
     STATE_CUR[i]  = Number(0);
   }
-  update_colors();
+  update_display();
 }
 
 function randomize_colors() {
@@ -43,7 +25,7 @@ function randomize_colors() {
       set_cell_color(STATE_CUR, cell_index(col, row), r, g, b);
     }
   }
-  update_colors();
+  update_display();
 }
 
 function set_cell_color(state, cell_id, r, g, b) {
@@ -51,10 +33,10 @@ function set_cell_color(state, cell_id, r, g, b) {
   state[cell_id] = ~Number((r << 16) + (g << 8) + b) & 0xffffff;
 }
 
-function update_colors() {
-  var ctx = canvas.getContext('2d');
+function update_display() {
   canvas.setAttribute('width', window.innerWidth);
   canvas.setAttribute('height', window.innerHeight);
+  var ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   var boxsize =
     Math.max(Math.ceil(canvas.width / COLS), Math.ceil(canvas.height/ ROWS));
@@ -69,7 +51,6 @@ function update_colors() {
 }
 
 function iterate() {
-  var new_colors = new Array(CELLS.length);
   for (var row=0; row < ROWS; row++) {
     for (var col=0; col < COLS; col++) {
       var cell_id = cell_index(col, row);
@@ -96,7 +77,7 @@ function iterate() {
   var t = STATE_CUR;
   STATE_CUR = STATE_NEXT;
   STATE_NEXT = t;
-  update_colors();
+  update_display();
 }
 
 function preset(idx) {
@@ -124,10 +105,9 @@ function preset(idx) {
     case 3:
       $([[0, 1],[1,2],[2,0],[2,1],[2,2]]).map(set_color(0,0,0));
   }
-  update_colors();
+  update_display();
 }
 
-var interval_id;
 function play() {
   interval_id = setInterval(iterate, 100);
   $('#play').hide();
@@ -141,7 +121,8 @@ function pause() {
 }
 
 $(function() {
-  generate_board();
+  canvas = document.getElementById('display');
+  clear_board();
   preset(3);
   play();
 });
