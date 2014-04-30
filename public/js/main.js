@@ -1,8 +1,8 @@
-var COLS = 10;
-var ROWS = 10;
-var CELLS = new Array(COLS * ROWS);
-var STATE_CUR = new Array(COLS * ROWS);
-var STATE_NEXT = new Array(COLS * ROWS);
+var COLS = 100;
+var ROWS = 100;
+var CELLS = new Array((COLS + 2) * (ROWS + 2));
+var STATE_CUR = new Array(CELLS.length);
+var STATE_NEXT = new Array(CELLS.length);
 
 // Adapted from http://stackoverflow.com/questions/5999209/jquery-how-to-get-the-background-color-code-of-an-element
 function rgb_parts(colorval) {
@@ -10,7 +10,7 @@ function rgb_parts(colorval) {
   return [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
 }
 
-function cell_index(col, row) { return row * COLS + col; }
+function cell_index(col, row) { return row * (COLS + 2) + col + 1; }
 
 var MASKS = [1, 2, 4, 8, 16, 32, 64, 128];
 function is_bit_on(parts, idx) {
@@ -20,62 +20,25 @@ function is_bit_on(parts, idx) {
       (idx < 24 && !(parts[0] & mask)));
 }
 
-(function($) {
-
-  $.fn.neighbors = function() {
-    var arr = $.makeArray(this);
-    return $($.map(arr, function(item, idx) {
-      item = $(item);
-      var x = Number(item.attr('row'));
-      var y = Number(item.attr('col'));
-      var cells = [];
-      for (var i=x-1; i < x+2; i++) {
-        if (i < 0 || i > COLS - 1 ) {
-          continue;
-        }
-        for (var j=y-1; j < y+2; j++) {
-          if (j < 0 || j > ROWS - 1 || ( i == x && j == y)) {
-            continue;
-          }
-          cells.push(CELLS[j * COLS + i]);
-        }
-      }
-      return $.makeArray(cells);
-    }));
-  };
-
-  $.fn.numAlive = function(idx) {
-    var count = 0;
-    this.each(function() {
-      var parts = rgb_parts($(this).css('background-color'));
-      if (is_bit_on(parts, idx)) {
-        count++;
-      }
-    });
-    return count;
-  };
-})(jQuery);
-
-
 function generate_board() {
   $('#container').prepend('<table id="board">')
-  for (var i=0; i<ROWS; i++) {
+  for (var row=0; row<ROWS; row++) {
     var tr = $('<tr>');
     $('#board').append(tr);
-    for (var j=0; j<COLS; j++) {
-      var td = $('<td style="background-color: #fff">');
-      td.attr('row', i);
-      td.attr('col', j);
+    for (var col=0; col<COLS; col++) {
+      var td = $('<td>');
       tr.append(td);
-      CELLS[i * COLS + j] = td;
-      STATE_CUR[i * COLS + j] = Number(0xffffff);
+      CELLS[cell_index(col, row)] = td;
     }
   }
+  clear_board();
 }
 
 function clear_board() {
-  for (var i = 0; i < CELLS.length; i++)
-    CELLS[i].css('background-color', '#fff');
+  for (var i = 0; i < CELLS.length; i++) {
+    STATE_CUR[i]  = Number(0);
+  }
+  update_colors();
 }
 
 function randomize_colors() {
@@ -83,47 +46,45 @@ function randomize_colors() {
     r = Math.round(Math.random() * 255);
     g = Math.round(Math.random() * 255);
     b = Math.round(Math.random() * 255);
-    CELLS[i].css('background-color',
-                 'rgb(' + r + ', ' + g + ', ' + b + ')');
+    set_cell_color(STATE_CUR, i, r, g, b);
   }
+  update_colors();
 }
 
 function set_cell_color(state, cell_id, r, g, b) {
-  state[cell_id] = Number((r << 16) + (g << 8) + b);
+  // White = dead, black = alive, so invert colors.
+  state[cell_id] = ~Number((r << 16) + (g << 8) + b) & 0xffffff;
 }
 
 function update_colors() {
+  var color;
   for (var i = 0; i < CELLS.length; i++) {
-    var c = i * 3;
-    CELLS[i].css(
-      'background-color', '#' + ('000000' + STATE_CUR[i].toString(16)).substr(-6));
+    color = ~STATE_CUR[i] & 0xffffff;   // 0 = white, 1 = black, so invert.
+    if (CELLS[i])
+      CELLS[i].css(
+        'background-color', '#' + ('000000' + color.toString(16)).substr(-6));
   }
 }
 
-// Strangely, we use 0 bits as "alive" and 1 bits as "dead", because we want
-// the fully dead state to be #fff, or white.
 function iterate() {
   var new_colors = new Array(CELLS.length);
-  for (var y=0; y<ROWS; y++) {
-    for (var x=0; x<COLS; x++) {
-      var cell_id = cell_index(x, y);
-      var cur_cell = CELLS[cell_id];
-      var cur_bg_color = cur_cell.css('background-color')
-      var bits = [];
-      for (var i=0; i<24; i++) {
-
-        var cur_alive = is_bit_on(rgb_parts(cur_bg_color), i);
-        var num_alive = cur_cell.neighbors().numAlive(i);
-        if (num_alive == 3 || (cur_alive && num_alive == 2)) {
-          bits[i] = '0';
-        } else {
-          bits[i] = '1';
+  for (var row=0; row < ROWS; row++) {
+    for (var col=0; col < COLS; col++) {
+      var cell_id = cell_index(col, row);
+      // Basically implement a 53-way parallel 3-bit incrementer.
+      var s0 = 0;
+      var s1 = 0;
+      var s2 = 0;
+      for (var nrow = row - 1; nrow <= row + 1; nrow++) {
+        for (var ncol = col - 1; ncol <= col + 1; ncol++) {
+          if (nrow == row && ncol == col) continue;
+          var n = STATE_CUR[cell_index(ncol, nrow)];
+          s2 ^= s1 & s0 & n;
+          s1 ^= s0 & n;
+          s0 ^= n;
         }
       }
-      r = parseInt(bits.slice(0,8).join(''), 2);
-      g = parseInt(bits.slice(8,16).join(''), 2);
-      b = parseInt(bits.slice(16,24).join(''), 2);
-      set_cell_color(STATE_NEXT, cell_id, r, g, b);
+      STATE_NEXT[cell_id] = ~s2 & s1 & (STATE_CUR[cell_id] | s0) & 0xffffff;
     }
   }
   var t = STATE_CUR;
@@ -153,6 +114,9 @@ function preset(idx) {
     $([[1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1],
       [1,8], [2,8], [3,8], [4,8], [5,8], [6,8], [7,8], [8,8]]).map(
         set_color(170, 37, 37));
+      break;
+    case 3:
+      $([[0, 1],[1,2],[2,0],[2,1],[2,2]]).map(set_color(0,0,0));
   }
   update_colors();
 }
@@ -165,7 +129,7 @@ function playpause() {
     is_playing = false;
     $('#playpause').text('Play');
   } else {
-    interval_id = setInterval(iterate, 1000);
+    interval_id = setInterval(iterate, 100);
     is_playing = true;
     $('#playpause').text('Pause');
   }

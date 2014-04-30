@@ -12,7 +12,7 @@ body {
 }
 
 #container {
-  height: 510px;
+  /* height: 510px; */
 }
 
 #board {
@@ -22,7 +22,7 @@ body {
 }
 
 #board td {
-  border: 1px solid #000;
-  height: 40px;
-  width: 40px;
+  border: 0;
+  height: 4px;
+  width: 4px;
 }
