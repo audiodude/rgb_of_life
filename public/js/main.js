@@ -4,6 +4,7 @@ var ROWS = 100;
 var CELLS = new Array((COLS + 2) * (ROWS + 2));
 var STATE_CUR = new Array(CELLS.length);
 var STATE_NEXT = new Array(CELLS.length);
+var canvas;
 
 // Adapted from http://stackoverflow.com/questions/5999209/jquery-how-to-get-the-background-color-code-of-an-element
 function rgb_parts(colorval) {
@@ -22,16 +23,7 @@ function is_bit_on(parts, idx) {
 }
 
 function generate_board() {
-  $('#container').prepend('<table id="board">')
-  for (var row=0; row<ROWS; row++) {
-    var tr = $('<tr>');
-    $('#board').append(tr);
-    for (var col=0; col<COLS; col++) {
-      var td = $('<td>');
-      tr.append(td);
-      CELLS[cell_index(col, row)] = td;
-    }
-  }
+  canvas = document.getElementById('display');
   clear_board();
 }
 
@@ -43,11 +35,13 @@ function clear_board() {
 }
 
 function randomize_colors() {
-  for (var i = 0; i < CELLS.length; i++) {
-    r = Math.round(Math.random() * 255);
-    g = Math.round(Math.random() * 255);
-    b = Math.round(Math.random() * 255);
-    set_cell_color(STATE_CUR, i, r, g, b);
+  for (var row = 0; row < ROWS; row++) {
+    for (var col = 0; col < COLS; col++) {
+      r = Math.round(Math.random() * 255);
+      g = Math.round(Math.random() * 255);
+      b = Math.round(Math.random() * 255);
+      set_cell_color(STATE_CUR, cell_index(col, row), r, g, b);
+    }
   }
   update_colors();
 }
@@ -58,12 +52,19 @@ function set_cell_color(state, cell_id, r, g, b) {
 }
 
 function update_colors() {
+  var ctx = canvas.getContext('2d');
+  canvas.setAttribute('width', window.innerWidth);
+  canvas.setAttribute('height', window.innerHeight);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  var boxsize =
+    Math.max(Math.ceil(canvas.width / COLS), Math.ceil(canvas.height/ ROWS));
   var color;
-  for (var i = 0; i < CELLS.length; i++) {
-    color = ~STATE_CUR[i] & 0xffffff;   // 0 = white, 1 = black, so invert.
-    if (CELLS[i])
-      CELLS[i].css(
-        'background-color', '#' + ('000000' + color.toString(16)).substr(-6));
+  for (var row = 0; row < ROWS; row++) {
+    for (var col = 0; col < COLS; col++) {
+      color = ~STATE_CUR[cell_index(col, row)] & 0xffffff;
+      ctx.fillStyle = '#' + ('000000' + color.toString(16)).substr(-6);
+      ctx.fillRect(col * boxsize, row * boxsize, boxsize, boxsize);
+    }
   }
 }
 

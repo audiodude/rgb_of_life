@@ -16,10 +16,13 @@
   </script>
 </head>
 <body>
-  <div id="container">
+<canvas id='display'></canvas>
+  <div id="controls">
     <!-- Table goes here -->
     <button id="playpause" onclick="playpause()">Play</button>
-    <button onclick="clear_board();">Clear</button><br>
+    <button onclick="clear_board();">Clear</button>
+    <button onclick="randomize_colors();">Randomize</button>
+    <br>
     <button onclick="preset(0);">Preset 0</button>
     <button onclick="preset(1);">Preset 1</button>
     <button onclick="preset(2);">Preset 2</button>
