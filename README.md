@@ -4,6 +4,7 @@ RGB Of Life
 A concept for Conway's game of life using RBG color bits, in HTML/Javascript
 
 From the HTML of the page:
+
 This page [app] demonstrates <a href="http://en.wikipedia.org/wiki/Conway's_Game_of_Life">Conway's Game of Life</a>
 in what can be considered 24 dimensions. There are actually 24 simultaneous "games of life" being played on the
 board, one for each bit in a <a href="http://en.wikipedia.org/wiki/RGB_color_model">24 bit RGB color value</a> that
