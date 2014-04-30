@@ -128,21 +128,20 @@ function preset(idx) {
 }
 
 var interval_id;
-var is_playing = false;
-function playpause() {
-  if (is_playing) {
-    clearInterval(interval_id);
-    is_playing = false;
-    $('#playpause').text('Play');
-  } else {
-    interval_id = setInterval(iterate, 100);
-    is_playing = true;
-    $('#playpause').text('Pause');
-  }
+function play() {
+  interval_id = setInterval(iterate, 100);
+  $('#play').hide();
+  $('#pause').show();
+}
+
+function pause() {
+  clearInterval(interval_id);
+  $('#play').show();
+  $('#pause').hide();
 }
 
 $(function() {
   generate_board();
   preset(3);
-  playpause();
+  play();
 });
