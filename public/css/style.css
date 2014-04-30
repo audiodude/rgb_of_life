@@ -1,28 +1,31 @@
 body {
   background-color: #ccc;
+  padding: 0;
+  margin: 0;
 }
 
-#container,
+#controls,
 #readme {
-  background-color: #fff;
+  position: absolute;
+  background-color: rgba(255, 255, 255, .5);
   line-height: 24px;
-  margin: 40px auto;
-  padding: 20px;
-  width: 740px;
+  padding: .5em 2em;
+  width: 100%;
+  box-sizing: border-box;
+  max-height: 50%;
+  overflow: auto;
 }
+#controls { top: 0; }
+#readme { bottom: 0; }
 
-#container {
-  height: 510px;
-}
+#close_readme { float : right }
 
-#board {
-  border: 1px solid #000;
-  border-collapse: collapse;
-  margin: 10px auto;
-}
 
-#board td {
-  border: 1px solid #000;
-  height: 40px;
-  width: 40px;
+#display {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }
