@@ -1,13 +1,13 @@
 var COLS = 100;
 var ROWS = 100;
 // Add an extra row/column to the edges to simplify logic later.
-var num_cells = (COLS + 2) * (ROWS + 2);
+var num_cells = COLS * ROWS;
 var STATE_CUR = new Array(num_cells);
 var STATE_NEXT = new Array(num_cells);
 var canvas;
 var interval_id;
 
-function cell_index(col, row) { return row * (COLS + 2) + col + 1; }
+function cell_index(col, row) { return row * COLS + col; }
 
 function clear_board() {
   for (var i = 0; i < num_cells; i++) {
@@ -19,9 +19,9 @@ function clear_board() {
 function randomize_colors() {
   for (var row = 0; row < ROWS; row++) {
     for (var col = 0; col < COLS; col++) {
-      r = Math.round(Math.random() * 255);
-      g = Math.round(Math.random() * 255);
-      b = Math.round(Math.random() * 255);
+      var r = Math.round(Math.random() * 255);
+      var g = Math.round(Math.random() * 255);
+      var b = Math.round(Math.random() * 255);
       set_cell_color(STATE_CUR, cell_index(col, row), r, g, b);
     }
   }
@@ -39,7 +39,7 @@ function update_display() {
   var ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   var boxsize =
-    Math.max(Math.ceil(canvas.width / COLS), Math.ceil(canvas.height/ ROWS));
+    Math.max(Math.ceil(canvas.width / COLS), Math.ceil(canvas.height / ROWS));
   var color;
   for (var row = 0; row < ROWS; row++) {
     for (var col = 0; col < COLS; col++) {
@@ -61,7 +61,9 @@ function iterate() {
       for (var nrow = row - 1; nrow <= row + 1; nrow++) {
         for (var ncol = col - 1; ncol <= col + 1; ncol++) {
           if (nrow == row && ncol == col) continue;
-          var n = STATE_CUR[cell_index(ncol, nrow)];
+          var ncolw = (ncol + COLS) % COLS;
+          var nroww = (nrow + ROWS) % ROWS;
+          var n = STATE_CUR[cell_index(ncolw, nroww)];
           s2 ^= s1 & s0 & n;
           s1 ^= s0 & n;
           s0 ^= n;
@@ -123,6 +125,6 @@ function pause() {
 $(function() {
   canvas = document.getElementById('display');
   clear_board();
-  preset(3);
+  randomize_colors();
   play();
 });
