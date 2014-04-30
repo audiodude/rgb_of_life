@@ -1,5 +1,6 @@
 var COLS = 10;
 var ROWS = 10;
+var CELLS = new Array(COLS * ROWS);
 
 // Adapted from http://stackoverflow.com/questions/5999209/jquery-how-to-get-the-background-color-code-of-an-element
 function rgb_parts(colorval) {
@@ -20,22 +21,22 @@ function is_bit_on(parts, idx) {
   $.fn.neighbors = function() {
     var arr = $.makeArray(this);
     return $($.map(arr, function(item, idx) {
-      var parts = item.id.split('-');
-      var x = Number(parts[0]);
-      var y = Number(parts[1]);
-      var ids = [];
+      item = $(item);
+      var x = Number(item.attr('row'));
+      var y = Number(item.attr('col'));
+      var cells = [];
       for (var i=x-1; i < x+2; i++) {
         if (i < 0 || i > COLS - 1 ) {
           continue;
         }
         for (var j=y-1; j < y+2; j++) {
-          if (y < 0 || y > ROWS - 1 || ( i == x && j == y)) {
+          if (j < 0 || j > ROWS - 1 || ( i == x && j == y)) {
             continue;
           }
-          ids.push(i + '-' + j);
+          cells.push(CELLS[j * COLS + i]);
         }
       }
-      return $.makeArray($('#' + ids.join(',#')));
+      return $.makeArray(cells);
     }));
   };
 
@@ -58,39 +59,38 @@ function generate_board() {
     var tr = $('<tr>');
     $('#board').append(tr);
     for (var j=0; j<COLS; j++) {
-      tr.append('<td id="' + j + '-' + i + '" style="background-color: #fff">');
+      var td = $('<td style="background-color: #fff">');
+      td.attr('row', i);
+      td.attr('col', j);
+      tr.append(td);
+      CELLS[i * COLS + j] = td;
     }
   }
 }
 
 function clear_board() {
-  for (var y=0; y<ROWS; y++) {
-    for (var x=0; x<COLS; x++) {
-      $('#' + x + '-' + y).css('background-color', '#fff');
-    }
-  }
+  for (var i = 0; i < CELLS.length; i++)
+    CELLS[i].css('background-color', '#fff');
 }
 
 function randomize_colors() {
-  for (var y=0; y<ROWS; y++) {
-    for (var x=0; x<COLS; x++) {
-      r = Math.round(Math.random() * 255);
-      g = Math.round(Math.random() * 255);
-      b = Math.round(Math.random() * 255);
-      $('#' + x + '-' + y).css('background-color',
-                               'rgb(' + r + ', ' + g + ', ' + b + ')');
-    }
+  for (var i = 0; i < CELLS.length; i++) {
+    r = Math.round(Math.random() * 255);
+    g = Math.round(Math.random() * 255);
+    b = Math.round(Math.random() * 255);
+    CELLS[i].css('background-color',
+                 'rgb(' + r + ', ' + g + ', ' + b + ')');
   }
 }
 
 // Strangely, we use 0 bits as "alive" and 1 bits as "dead", because we want
 // the fully dead state to be #fff, or white.
 function iterate() {
-  var new_colors = {};
+  var new_colors = new Array(CELLS.length);
   for (var y=0; y<ROWS; y++) {
     for (var x=0; x<COLS; x++) {
-      var cell_id = '#' + x + '-' + y;
-      var cur_cell = $(cell_id);
+      var cell_id = y * COLS + x;
+      var cur_cell = CELLS[cell_id];
       var cur_bg_color = cur_cell.css('background-color')
       var bits = [];
       for (var i=0; i<24; i++) {
@@ -109,28 +109,29 @@ function iterate() {
       new_colors[cell_id] = 'rgb(' + r + ', ' + g + ', ' + b + ')';
     }
   }
-  $.each(new_colors, function(td_id, color) {
-    $(td_id).css('background-color', color);
-  })
+  for (var i = 0; i < CELLS.length; i++)
+    CELLS[i].css('background-color', new_colors[i]);
 }
 
 function preset(idx) {
   idx = idx || 0;
+  function set_color(color) {
+    return function(_, x) { CELLS[x[0] + x[1] * COLS].css('background-color', color) };
+  }
   switch(idx) {
     case 2:
-    $('#1-3, #2-3, #3-3, #4-3, #5-3, #6-3, #7-3, #8-3, ' +
-      '#1-6, #2-6, #3-6, #4-6, #5-6, #6-6, #7-6, #8-6').css(
-          'background-color', '#3663cc');
+      $([[1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3],
+        [1,6], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6]]).map(
+          set_color('#3663cc'));
     case 1:
-    $('#1-2, #2-2, #3-2, #4-2, #5-2, #6-2, #7-2, #8-2, ' +
-      '#1-7, #2-7, #3-7, #4-7, #5-7, #6-7, #7-7, #8-7').css(
-          'background-color', '#28bb82');
+    $([[1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2],
+      [1,7], [2,7], [3,7], [4,7], [5,7], [6,7], [7,7], [8,7]]).map(
+        set_color('#28bb82'));
 
     case 0:
-    $('#1-1, #2-1, #3-1, #4-1, #5-1, #6-1, #7-1, #8-1, ' +
-      '#1-8, #2-8, #3-8, #4-8, #5-8, #6-8, #7-8, #8-8').css(
-          'background-color', '#aa2525');
-
+    $([[1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1],
+      [1,8], [2,8], [3,8], [4,8], [5,8], [6,8], [7,8], [8,8]]).map(
+        set_color('#aa2525'));
   }
 }
 
