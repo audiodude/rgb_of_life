@@ -38,17 +38,19 @@ function set_cell_color(state, cell_id, r, g, b) {
 function update_display() {
   var color;
   var idx;
-  var blocksize = Math.max(Math.ceil(window.innerWidth / COLS),
-                           Math.ceil(window.innerHeight / ROWS));
-  if (!img_data || canvas.width != window.innerWidth ||
-      canvas.height != window.innerHeight) {
-    canvas.setAttribute('width', window.innerWidth);
-    canvas.setAttribute('height', window.innerHeight);
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  var blocksize = Math.max(Math.ceil(width / COLS), Math.ceil(height / ROWS));
+  if (!img_data || canvas.width != width || canvas.height != height) {
+    canvas.setAttribute('width', width);
+    canvas.setAttribute('height', height);
     img_data = ctx.createImageData(blocksize * COLS, blocksize * ROWS);
   }
   var stride = blocksize * COLS;
   for (var row = 0; row < ROWS; row++) {
+    if (row * blocksize > height) break;  // Skip drawing offscreen pixels.
     for (var col = 0; col < COLS; col++) {
+      if (col * blocksize > width) break;  // Skip drawing offscreen pixels.
       color = ~STATE_CUR[cell_index(col, row)] & 0xffffff;
       for (var brow = 0; brow < blocksize; brow++) {
         for (var bcol = 0; bcol < blocksize; bcol++) {
