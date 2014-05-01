@@ -163,21 +163,26 @@ function get_pencil_pos(evt) {
 }
 
 var is_pencil_down = false;
+var cur_pencil_col = null;
+var cur_pencil_row = null;
 function on_pencil_down(evt) {
   is_pencil_down = true;
+  pos = get_pencil_pos(evt);
+  set_cell_color(STATE_CUR, cell_index(pos.col, pos.row),
+                 pencil_color.r, pencil_color.g, pencil_color.b);
+  update_display();
 }
 
 function on_pencil_up(evt) {
   is_pencil_down = false;
 }
 
-var cur_pencil_col = null;
-var cur_pencil_row = null;
 function on_pencil_move(evt) {
   if (is_pencil_down) {
     pos = get_pencil_pos(evt);
     if (pos.row != cur_pencil_row || pos.col != cur_pencil_col) {
-      set_cell_color(STATE_CUR, cell_index(pos.col, pos.row), 0, 0, 0);
+      set_cell_color(STATE_CUR, cell_index(pos.col, pos.row),
+                     pencil_color.r, pencil_color.g, pencil_color.b);
       update_display();
     }
     cur_pencil_row = pos.row;
@@ -186,10 +191,10 @@ function on_pencil_move(evt) {
 }
 
 var in_pencil = false;
+var pencil_color = {r:0, g:0, b:0};
 function toggle_pencil() {
   in_pencil = !in_pencil;
   if (in_pencil) {
-    pause();
     $('#display').on('mousedown.pencil', on_pencil_down);
     $('#display').on('mousemove.pencil', on_pencil_move);
     $('#display').on('mouseup.pencil', on_pencil_up);
@@ -221,6 +226,15 @@ $(function() {
   ctx = canvas.getContext('2d')
   
   $('#pencil-btn').click(toggle_pencil);
+  $('#pencil-btn').ColorPicker({
+    onShow: function() {
+      return in_pencil;
+    },
+    onChange: function(hsb, hex, rgb) {
+      pencil_color = rgb;
+      $('#swatch').css('background-color', '#' + hex);
+    }
+  });
 
   clear_board();
   randomize_colors();
