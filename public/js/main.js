@@ -9,7 +9,15 @@ var ctx;
 var img_data;
 var interval_id;
 
-function cell_index(col, row) { return row * COLS + col; }
+function cell_index(col, row) {
+  return row * COLS + col;
+}
+
+function get_blocksize() {
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  return Math.max(Math.ceil(width / COLS), Math.ceil(height / ROWS));
+}
 
 function clear_board() {
   for (var i = 0; i < num_cells; i++) {
@@ -40,7 +48,7 @@ function update_display() {
   var idx;
   var width = window.innerWidth;
   var height = window.innerHeight;
-  var blocksize = Math.max(Math.ceil(width / COLS), Math.ceil(height / ROWS));
+  var blocksize = get_blocksize();
   if (!img_data || canvas.width != width || canvas.height != height) {
     canvas.setAttribute('width', width);
     canvas.setAttribute('height', height);
@@ -143,6 +151,57 @@ function preset(idx) {
   update_display();
 }
 
+function get_pencil_pos(evt) {
+  var offset = $('#display').offset();
+  var blocksize = get_blocksize();
+  var col = Math.floor((evt.clientX - offset.left) / blocksize);
+  var row = Math.floor((evt.clientY - offset.top) / blocksize);
+  return {
+    row: row,
+    col: col
+  }
+}
+
+var is_pencil_down = false;
+function on_pencil_down(evt) {
+  is_pencil_down = true;
+}
+
+function on_pencil_up(evt) {
+  is_pencil_down = false;
+}
+
+var cur_pencil_col = null;
+var cur_pencil_row = null;
+function on_pencil_move(evt) {
+  if (is_pencil_down) {
+    pos = get_pencil_pos(evt);
+    if (pos.row != cur_pencil_row || pos.col != cur_pencil_col) {
+      set_cell_color(STATE_CUR, cell_index(pos.col, pos.row), 0, 0, 0);
+      update_display();
+    }
+    cur_pencil_row = pos.row;
+    cur_pencil_col = pos.col;
+  }
+}
+
+var in_pencil = false;
+function toggle_pencil() {
+  in_pencil = !in_pencil;
+  if (in_pencil) {
+    pause();
+    $('#display').on('mousedown.pencil', on_pencil_down);
+    $('#display').on('mousemove.pencil', on_pencil_move);
+    $('#display').on('mouseup.pencil', on_pencil_up);
+    $('#display').addClass('pencil');
+  } else {
+    $('#display').off('mousedown.pencil');
+    $('#display').off('mousemove.pencil');
+    $('#display').off('mouseup.pencil');
+    $('#display').removeClass('pencil');
+  }
+}
+
 function play() {
   interval_id = setInterval(iterate, 100);
   $('#play').hide();
@@ -158,6 +217,9 @@ function pause() {
 $(function() {
   canvas = document.getElementById('display');
   ctx = canvas.getContext('2d')
+  
+  $('#pencil-btn').click(toggle_pencil);
+
   clear_board();
   randomize_colors();
   play();
