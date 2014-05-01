@@ -15,11 +15,19 @@ body {
   max-height: 50%;
   overflow: auto;
 }
-#controls { top: 0; }
-#readme { bottom: 0; }
 
-#close_readme { float : right }
+#controls {
+  top: 0;
+}
 
+#readme {
+  bottom: 0;
+  font-family: 'Roboto', sans-serif;
+}
+
+#close_readme {
+  float : right
+}
 
 #display {
   position: absolute;
