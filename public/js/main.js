@@ -5,6 +5,8 @@ var num_cells = COLS * ROWS;
 var STATE_CUR = new Array(num_cells);
 var STATE_NEXT = new Array(num_cells);
 var canvas;
+var ctx;
+var img_data;
 var interval_id;
 
 function cell_index(col, row) { return row * COLS + col; }
@@ -34,20 +36,21 @@ function set_cell_color(state, cell_id, r, g, b) {
 }
 
 function update_display() {
-  canvas.setAttribute('width', window.innerWidth);
-  canvas.setAttribute('height', window.innerHeight);
-  var ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  var boxsize =
-    Math.max(Math.ceil(canvas.width / COLS), Math.ceil(canvas.height / ROWS));
   var color;
+  var idx;
   for (var row = 0; row < ROWS; row++) {
     for (var col = 0; col < COLS; col++) {
       color = ~STATE_CUR[cell_index(col, row)] & 0xffffff;
-      ctx.fillStyle = '#' + ('000000' + color.toString(16)).substr(-6);
-      ctx.fillRect(col * boxsize + .5, row * boxsize + .5, boxsize, boxsize);
+      idx = cell_index(col, row);
+      img_data.data[idx * 4 + 0] = (color >> 16) & 0xff;
+      img_data.data[idx * 4 + 1] = (color >> 8) & 0xff;
+      img_data.data[idx * 4 + 2] = (color >> 0) & 0xff;
+      img_data.data[idx * 4 + 3] = 0xff;
     }
   }
+  var scale = Math.max(Math.ceil(canvas.width / COLS),
+      Math.ceil(canvas.height / ROWS));
+  ctx.putImageData(img_data, 0, 0);
 }
 
 function iterate() {
@@ -124,6 +127,10 @@ function pause() {
 
 $(function() {
   canvas = document.getElementById('display');
+  canvas.setAttribute('width', COLS);
+  canvas.setAttribute('height', ROWS);
+  ctx = canvas.getContext('2d')
+  img_data = ctx.createImageData(COLS, ROWS);
   clear_board();
   randomize_colors();
   play();
