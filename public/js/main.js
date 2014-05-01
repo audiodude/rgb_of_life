@@ -194,11 +194,13 @@ function toggle_pencil() {
     $('#display').on('mousemove.pencil', on_pencil_move);
     $('#display').on('mouseup.pencil', on_pencil_up);
     $('#display').addClass('pencil');
+    $('#pencil-btn').addClass('selected');
   } else {
     $('#display').off('mousedown.pencil');
     $('#display').off('mousemove.pencil');
     $('#display').off('mouseup.pencil');
     $('#display').removeClass('pencil');
+    $('#pencil-btn').removeClass('selected');
   }
 }
 
