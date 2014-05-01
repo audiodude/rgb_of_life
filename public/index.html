@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>RGB Game of Life</title>
-  <link type="text/css" rel="stylesheet" href="css/style.css"/>
-  <link href='//fonts.googleapis.com/css?family=Roboto:400,700' rel='stylesheet' type='text/css'>
+  <title>RGB of Life</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <!-- Buttons from http://alexwolfe.github.io/Buttons/ -->
+  <link href="css/buttons.css" rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css">
   <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, user-scalable=no">
   <script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
@@ -22,16 +24,28 @@
 <canvas id='display'></canvas>
   <div id="controls">
     <!-- Table goes here -->
-    <button id="play" onclick="play()"><i class="fa fa-play"></i> Play</button>
-    <button id="pause" onclick="pause()"><i class="fa fa-pause"></i> Pause</button>
-    <button onclick="clear_board();">Clear</button>
-    <button onclick="randomize_colors();">Randomize</button>
-    <button onclick="preset(0);">Preset 0</button>
-    <button onclick="preset(1);">Preset 1</button>
-    <button onclick="preset(3);">Glider</button>
-    <div id="pencil-btn" class="button">
+    <a href="javascript:void(0);" class="button button-rounded button-tiny" id="play" onclick="play()">
+      <i class="fa fa-play"></i> Play
+    </a>
+    <a href="javascript:void(0);" class="button button-rounded button-tiny" id="pause" onclick="pause()">
+      <i class="fa fa-pause"></i> Pause
+    </a>
+    <a href="javascript:void(0);" class="button button-rounded button-tiny" onclick="clear_board();">
+      Clear
+    </a>
+    <a href="javascript:void(0);" class="button button-rounded button-tiny" onclick="randomize_colors();">
+      Randomize
+    </a>
+    <a href="javascript:void(0);" class="button button-rounded button-tiny" onclick="preset(0);">
+      Preset 0
+    </a>
+    <a href="javascript:void(0);" class="button button-rounded button-tiny" onclick="preset(1);">
+      Preset 1
+    </a>
+    <a href="javascript:void(0);" class="button button-rounded button-tiny" onclick="preset(3);">Glider</a>
+    <a href="javascript:void(0);" class="button button-rounded button-tiny" id="pencil-btn" class="button">
       <i class="fa fa-pencil"></i>
-    </div>
+    </a>
   </div>
   <div id="readme">
     <h1>

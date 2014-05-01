@@ -20,15 +20,18 @@ body {
   top: 0;
 }
 
-.button {
-  border: 1px solid #000;
-  display: inline-block;
-  padding: 0 4px;
+#play {
+  width: 45px;
 }
 
 #readme {
   bottom: 0;
   font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+}
+
+#readme h1 {
+  font-size: 18px;
 }
 
 #close_readme {
