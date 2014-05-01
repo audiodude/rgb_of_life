@@ -5,6 +5,8 @@ var num_cells = COLS * ROWS;
 var STATE_CUR = new Array(num_cells);
 var STATE_NEXT = new Array(num_cells);
 var canvas;
+var ctx;
+var img_data;
 var interval_id;
 
 function cell_index(col, row) { return row * COLS + col; }
@@ -34,20 +36,33 @@ function set_cell_color(state, cell_id, r, g, b) {
 }
 
 function update_display() {
-  canvas.setAttribute('width', window.innerWidth);
-  canvas.setAttribute('height', window.innerHeight);
-  var ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  var boxsize =
-    Math.max(Math.ceil(canvas.width / COLS), Math.ceil(canvas.height / ROWS));
   var color;
+  var idx;
+  var blocksize = Math.max(Math.ceil(window.innerWidth / COLS),
+                           Math.ceil(window.innerHeight / ROWS));
+  if (!img_data || canvas.width != window.innerWidth ||
+      canvas.height != window.innerHeight) {
+    canvas.setAttribute('width', window.innerWidth);
+    canvas.setAttribute('height', window.innerHeight);
+    img_data = ctx.createImageData(blocksize * COLS, blocksize * ROWS);
+  }
+  var stride = blocksize * COLS;
   for (var row = 0; row < ROWS; row++) {
     for (var col = 0; col < COLS; col++) {
       color = ~STATE_CUR[cell_index(col, row)] & 0xffffff;
-      ctx.fillStyle = '#' + ('000000' + color.toString(16)).substr(-6);
-      ctx.fillRect(col * boxsize, row * boxsize, boxsize, boxsize);
+      for (var brow = 0; brow < blocksize; brow++) {
+        for (var bcol = 0; bcol < blocksize; bcol++) {
+          idx =
+            ((row * blocksize + brow) * stride + (col * blocksize + bcol)) * 4;
+          img_data.data[idx + 0] = (color >> 16) & 0xff;
+          img_data.data[idx + 1] = (color >> 8) & 0xff;
+          img_data.data[idx + 2] = (color >> 0) & 0xff;
+          img_data.data[idx + 3] = 0xff;
+        }
+      }
     }
   }
+  ctx.putImageData(img_data, 0, 0);
 }
 
 function iterate() {
@@ -140,6 +155,7 @@ function pause() {
 
 $(function() {
   canvas = document.getElementById('display');
+  ctx = canvas.getContext('2d')
   clear_board();
   randomize_colors();
   play();
