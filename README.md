@@ -4,7 +4,7 @@ RGB Of Life
 A concept for Conway's game of life using RBG color bits, in HTML/Javascript.
 The public demo of this app is at: http://rgb.0-z-0.com
 
-# Description
+## Description
 From the HTML of the page:
 
 This page [app] demonstrates <a href="http://en.wikipedia.org/wiki/Conway's_Game_of_Life">Conway's Game of Life</a>
@@ -14,7 +14,7 @@ is the background of the square. However, since we naturally think of white as t
 color, the bits have been flipped in this demonstration so that 0 represents alive and 1 represents dead. Thus #fff,
 which is white, represents a cell that is completely dead, even though all of the bits are "on".
     
-# Running locally
+## Running locally
 The app is basically just some HTML/Javascript/CSS, so it doesn't need anything specific to run. Any web server can serve this as static files. However, it has been configured to run as a static Rack application in order to easily run on Heroku. To run locally, first install the bundle with `$ bundle install` then simply do:
 
 ```
