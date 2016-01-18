@@ -3,10 +3,10 @@
 <head>
   <title>RGB of Life</title>
   <link type="text/css" rel="stylesheet" href="css/style.css">
-  <!-- Buttons from http://alexwolfe.github.io/Buttons/ -->
+  <!-- Buttons from https://alexwolfe.github.io/Buttons/ -->
   <link href="css/buttons.css" rel="stylesheet" type="text/css">
-  <link href="//fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css">
-  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css">
+  <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
   <!-- JQuery Color Picker, from http://www.eyecon.ro/colorpicker/ -->
   <link rel="stylesheet" media="screen" type="text/css" href="css/colorpicker.css" />
   <meta name="viewport" content="width=device-width, user-scalable=no">
@@ -17,8 +17,9 @@
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
+    ga('set', 'forceSSL', true);
     ga('create', 'UA-8311622-14', '0-z-0.com');
     ga('send', 'pageview');
   </script>
@@ -56,17 +57,17 @@
       RGB Of Life
     </h1>
     <p>
-      This page demonstrates <a href="http://en.wikipedia.org/wiki/Conway's_Game_of_Life">Conway's Game of Life</a>
+      This page demonstrates <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life">Conway's Game of Life</a>
       in 24 bit RGB. There are actually 24 simultaneous "games of life" being played on the above board, one for
-      each bit in a <a href="http://en.wikipedia.org/wiki/RGB_color_model">24 bit RGB color value</a> that is the
+      each bit in a <a href="https://en.wikipedia.org/wiki/RGB_color_model">24 bit RGB color value</a> that is the
       background of the square. However, since we naturally think of white as the "dead" color and black as the "alive"
       color, the bits have been flipped in this demonstration so that 0 represents alive and 1 represents dead. Thus
       #fff, which is white, represents a cell that is completely dead, even though all of the bits are "on".
     </p>
     <p>
-      Feel free to browse the <a href="/js/main.js">Javascript source</a> of this demonstration. It makes heavy use of
-      HTML5 canvas element and some use of the <a href="http://jquery.com/">jQuery</a> Javascript library. The source
-      code of this demonstration is <a href="https://github.com/audiodude/rgb_of_life">available on Github</a>.
+      Feel free to browse the <a href="/js/main.js">JavaScript source</a> of this demonstration. It makes heavy use of
+      HTML5 canvas element and some use of the <a href="https://jquery.com/">jQuery</a> JavaScript library. The source
+      code of this demonstration is <a href="https://github.com/audiodude/rgb_of_life">available on GitHub</a>.
     </p>
   </div>
 </body>
