@@ -16,8 +16,8 @@ var COLS = 100;
 var ROWS = 100;
 // Add an extra row/column to the edges to simplify logic later.
 var num_cells = COLS * ROWS;
-var STATE_CUR = new Array(num_cells);
-var STATE_NEXT = new Array(num_cells);
+var STATE_CUR = new Uint32Array(num_cells);
+var STATE_NEXT = new Uint32Array(num_cells);
 // Will we have to simulate image-rendering: pixelated?
 var manual_pixelated =
     !CSS.supports || !CSS.supports('image-rendering', 'pixelated');
@@ -78,10 +78,7 @@ function update_display() {
 }
 
 function clear_board() {
-  var i;
-  for (i = 0; i < num_cells; i++) {
-    STATE_CUR[i]  = Number(0);
-  }
+  STATE_CUR.fill(0);
   update_display();
 }
 
