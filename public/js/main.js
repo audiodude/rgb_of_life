@@ -1,5 +1,3 @@
-/*global window, document, $ */
-
 // The state of each cell is stored as a Number, with the bottom 24 bits
 // each part of a different game of life. These states are stored in
 // the array STATE_CUR. The function cell_index maps from (row, col) to an
@@ -11,6 +9,7 @@
 // iterate() computes the new state in STATE_NEXT and then swaps it over.
 // update_display() updates a canvas element with the contents of STATE_CUR.
 
+"use strict";
 
 var COLS = 100;
 var ROWS = 100;
@@ -173,7 +172,7 @@ function preset(idx) {
       break;
 
     case 3:
-      $([[0, 1],[1,2],[2,0],[2,1],[2,2]]).map(set_color(0,0,0));
+      $([[0,1],[1,2],[2,0],[2,1],[2,2]]).map(set_color(0,0,0));
       break;
   }
   update_display();
