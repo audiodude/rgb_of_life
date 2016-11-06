@@ -1,0 +1,11 @@
+{
+  "indent": 2,
+  "white": true,
+  "plusplus": true,
+  "bitwise": true,
+  "vars": true,
+  "nomen": true,
+  "unparam": true,
+  "continue": true,
+  "predef": ["window", "document", "CSS", "$", "Uint32Array"]
+}

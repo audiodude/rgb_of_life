@@ -1,5 +1,3 @@
-/*global window, document, $ */
-
 // The state of each cell is stored as a Number, with the bottom 24 bits
 // each part of a different game of life. These states are stored in
 // the array STATE_CUR. The function cell_index maps from (row, col) to an
@@ -11,13 +9,17 @@
 // iterate() computes the new state in STATE_NEXT and then swaps it over.
 // update_display() updates a canvas element with the contents of STATE_CUR.
 
+"use strict";
 
 var COLS = 100;
 var ROWS = 100;
 // Add an extra row/column to the edges to simplify logic later.
 var num_cells = COLS * ROWS;
-var STATE_CUR = new Array(num_cells);
-var STATE_NEXT = new Array(num_cells);
+var STATE_CUR = new Uint32Array(num_cells);
+var STATE_NEXT = new Uint32Array(num_cells);
+// Will we have to simulate image-rendering: pixelated?
+var manual_pixelated =
+    !CSS.supports || !CSS.supports('image-rendering', 'pixelated');
 var canvas;   // The <canvas> element used to display the grid.
 var ctx;      // The canvas's context, used for drawing operations.
 var img_data; // An 32bpp buffer that we update and write to the canvas.
@@ -43,9 +45,9 @@ function update_display() {
   var row, col, brow, bcol;
   var color;
   var idx;
-  var width = window.innerWidth;
-  var height = window.innerHeight;
-  var blocksize = get_blocksize();
+  var width = manual_pixelated ? window.innerWidth : 100;
+  var height = manual_pixelated ? window.innerHeight : 100;
+  var blocksize = manual_pixelated ? get_blocksize() : 1;
   if (!img_data || canvas.width !== width || canvas.height !== height) {
     canvas.setAttribute('width', width);
     canvas.setAttribute('height', height);
@@ -75,10 +77,7 @@ function update_display() {
 }
 
 function clear_board() {
-  var i;
-  for (i = 0; i < num_cells; i++) {
-    STATE_CUR[i]  = Number(0);
-  }
+  STATE_CUR.fill(0);
   update_display();
 }
 
@@ -173,7 +172,7 @@ function preset(idx) {
       break;
 
     case 3:
-      $([[0, 1],[1,2],[2,0],[2,1],[2,2]]).map(set_color(0,0,0));
+      $([[0,1],[1,2],[2,0],[2,1],[2,2]]).map(set_color(0,0,0));
       break;
   }
   update_display();
