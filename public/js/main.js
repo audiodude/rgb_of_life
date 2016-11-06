@@ -18,6 +18,9 @@ var ROWS = 100;
 var num_cells = COLS * ROWS;
 var STATE_CUR = new Array(num_cells);
 var STATE_NEXT = new Array(num_cells);
+// Will we have to simulate image-rendering: pixelated?
+var manual_pixelated =
+    !CSS.supports || !CSS.supports('image-rendering', 'pixelated');
 var canvas;   // The <canvas> element used to display the grid.
 var ctx;      // The canvas's context, used for drawing operations.
 var img_data; // An 32bpp buffer that we update and write to the canvas.
@@ -43,9 +46,9 @@ function update_display() {
   var row, col, brow, bcol;
   var color;
   var idx;
-  var width = window.innerWidth;
-  var height = window.innerHeight;
-  var blocksize = get_blocksize();
+  var width = manual_pixelated ? window.innerWidth : 100;
+  var height = manual_pixelated ? window.innerHeight : 100;
+  var blocksize = manual_pixelated ? get_blocksize() : 1;
   if (!img_data || canvas.width !== width || canvas.height !== height) {
     canvas.setAttribute('width', width);
     canvas.setAttribute('height', height);
