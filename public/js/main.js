@@ -11,14 +11,16 @@
 
 "use strict";
 
-var COLS = 100;
-var ROWS = 100;
+const SCALE = 7;
+const COLS = 1 << SCALE;
+const ROWS = 1 << SCALE;
+const MASK = (1 << SCALE) - 1;
 // Add an extra row/column to the edges to simplify logic later.
-var num_cells = COLS * ROWS;
+const num_cells = COLS * ROWS;
 var STATE_CUR = new Uint32Array(num_cells);
 var STATE_NEXT = new Uint32Array(num_cells);
 // Will we have to simulate image-rendering: pixelated?
-var manual_pixelated =
+const manual_pixelated =
     !CSS.supports || !CSS.supports('image-rendering', 'pixelated');
 var canvas;   // The <canvas> element used to display the grid.
 var ctx;      // The canvas's context, used for drawing operations.
@@ -32,7 +34,7 @@ function set_cell_color(state, cell_id, r, g, b) {
 }
 
 function cell_index(col, row) {
-  return row * COLS + col;
+  return ((row&MASK) << SCALE) + (col&MASK);
 }
 
 function get_blocksize() {
@@ -41,13 +43,13 @@ function get_blocksize() {
   return Math.max(Math.ceil(width / COLS), Math.ceil(height / ROWS));
 }
 
-function update_display() {
+function update_display_slow() {
   var row, col, brow, bcol;
   var color;
   var idx;
-  var width = manual_pixelated ? window.innerWidth : 100;
-  var height = manual_pixelated ? window.innerHeight : 100;
-  var blocksize = manual_pixelated ? get_blocksize() : 1;
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  var blocksize = get_blocksize();
   if (!img_data || canvas.width !== width || canvas.height !== height) {
     canvas.setAttribute('width', width);
     canvas.setAttribute('height', height);
@@ -76,6 +78,34 @@ function update_display() {
   ctx.putImageData(img_data, 0, 0);
 }
 
+function update_display_fast() {
+  var i = 0;
+  var color;
+  var idx = 0;
+  if (!img_data || canvas.width !== COLS || canvas.height !== ROWS) {
+    canvas.setAttribute('width', COLS);
+    canvas.setAttribute('height', ROWS);
+    img_data = ctx.createImageData(COLS, ROWS);
+  }
+  for (i = 0; i < num_cells; ++i) {
+    color = ~STATE_CUR[i];
+    img_data.data[idx] = (color >> 16) & 0xff;
+    img_data.data[idx + 1] = (color >> 8) & 0xff;
+    img_data.data[idx + 2] = (color >> 0) & 0xff;
+    img_data.data[idx + 3] = 0xff;
+    idx += 4;
+  }
+  ctx.putImageData(img_data, 0, 0);
+}
+
+function update_display() {
+  if (!manual_pixelated) {
+    update_display_fast();
+  } else {
+    update_display_slow();
+  }
+}
+
 function clear_board() {
   STATE_CUR.fill(0);
   update_display();
@@ -97,10 +127,18 @@ function randomize_colors() {
 function iterate() {
   var row, col, cell_id;
   var s0, s1, s2;
-  var nrow, ncol, ncolw, nroww, n;
-  for (row=0; row < ROWS; row++) {
+  const rowincr = 1 << SCALE;
+  const colmask = MASK;
+  const rowmask = MASK << SCALE;
+  function add(c, r) {
+    var v = STATE_CUR[(r&rowmask) | (c&colmask)];
+    s2 ^= s1 & s0 & v;  // Flip bit 2 if we need to carry from bit 1.
+    s1 ^= s0 & v;  // Flip bit 1 if we need to carry from bit 0.
+    s0 ^= v;  // Flip bit 0 if we need to add one.
+  }
+  for (row=0; row < (ROWS<<SCALE); row+=rowincr) {
     for (col=0; col < COLS; col++) {
-      cell_id = cell_index(col, row);
+      cell_id = row | col;
       // Implement a 24-way parallel 3-bit counter using bitwise operations.
       // Note: If there are 8 or 9 live neighbors the counter will wrap to 0 or
       // 1, but the result is a dead cell in all four cases so it doesn't
@@ -108,17 +146,14 @@ function iterate() {
       s0 = 0;
       s1 = 0;
       s2 = 0;
-      for (nrow = row - 1; nrow <= row + 1; nrow++) {
-        for (ncol = col - 1; ncol <= col + 1; ncol++) {
-          if (nrow === row && ncol === col) { continue; }
-          ncolw = (ncol + COLS) % COLS;
-          nroww = (nrow + ROWS) % ROWS;
-          n = STATE_CUR[cell_index(ncolw, nroww)];
-          s2 ^= s1 & s0 & n;  // Flip bit 2 if we need to carry from bit 1.
-          s1 ^= s0 & n;  // Flip bit 1 if we need to carry from bit 0.
-          s0 ^= n;  // Flip bit 0 if we need to add one.
-        }
-      }
+      add(col-1, row-rowincr);
+      add(col, row-rowincr);
+      add(col+1, row-rowincr);
+      add(col-1, row);
+      add(col+1, row);
+      add(col-1, row+rowincr);
+      add(col, row+rowincr);
+      add(col+1, row+rowincr);
       // Derived from the truth table (for all other inputs, c' = 0).
       // c   s2 s1 s0  c'
       // 0   0  1   1  1
